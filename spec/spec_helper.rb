@@ -4,6 +4,7 @@ require 'rspec'
 require 'search_engine'
 require 'tools/ppm'
 require 'bin'
+require 'xcorr'
 
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.

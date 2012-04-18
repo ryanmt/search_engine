@@ -28,7 +28,7 @@ class Molecule
       arr = Array.new(arr_size) { 0 }
       arrs[element] = arr
     end
-    require_relative '../data/isotopes'
+    require_relative 'isotopes'
     require_relative '../tools/fft_R'
     transformer = FFT.new
     arrs.keys.each do |element|
