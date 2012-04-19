@@ -2,6 +2,9 @@ require 'json'
 require 'tools/digestor'
 require 'peptide_centric'
 require 'tools/fragmenter'
+require 'bin'
+
+require 'mspire/mzml'
 
 module MS
   module SearchEngine
@@ -41,26 +44,59 @@ module MS
           theospec_out = outfile_name.sub('changethis', ".spectra_#{Time.now.to_i.to_s[3,7]}.yml")
           putsv "Writing #{theospec_out}"
           File.open(theospec_out, 'w') do |out|
-            out.print theoretical_spectra.to_json
+            Marshal.dump(theoretical_spectra, out)
           end
         end # Option
         theoretical_spectra
       end
       def load_theoretical_spectra_from_file(file)
         #Load the YAML file
+        tmp = nil
         File.open(file, 'r') do |io|
-          JSON.parse(io)
+          tmp = Marshal::load(io)
         end
         putsv "Loaded the file"
+        tmp
       end
       def search_mzml(mzml_file)
-        #Open mzML
+        experimental_spectra = []
+        Mspire::Mzml.open(mzml_file) do |mzml|
+          mzml.each do |spec|
+            next unless spec.ms_level == 2 
+            experimental_spectra << MS::DataStructs::ExperimentalSpectrum.new(spec.mzs, spec.intensities.map{|v| Math.sqrt(v) }, spec.precursor_mz, spec.precursor_charge)
+          end
+        end
         #Each spectrum:
-          # Normalize??? XCORR is robust to normalizations...
-          # Bin
-          # Compare to fragmentation scans within selected mass window (ONLY CALL THIS ONCE, as the experimental scan will be preprocessed then compared to each theoretical scan)
+        experimental_spectra.each do |spectrum|
+          spectrum.bins = MS::Bin.create_bins_by_ppm(section_top, end_point , MS::SearchEngine::Options[:ms2_mass_tolerance])
+          MS::Bin.bin(spectrum.bins, spectrum.mzs_and_intensities, &:first)
+          spectrum.bins.each do |bin|
+            bin.data= bin.data.map(&:last).inject(:+)
+          end
+          spectrum.bins = normalize_by_section(spectrum.bins)
+        end
+        # Compare to fragmentation scans within selected mass window (ONLY CALL THIS ONCE, as the experimental scan will be preprocessed then compared to each theoretical scan)
       end
-
+      def normalize_by_section(bins)
+        end_point = bins.map(&:end).max
+        section_top = bins.map(&:begin).min
+        incrementer = MS::SearchEngine::Options[:normalization_window_width]
+        sections = []
+        bins.each do |bin|
+          bin.data = bin.data.nil? ? 0 : bin.data
+          if bin.end > section_top
+            break if section_top == end_point
+            section_top += incrementer
+            sections << []
+          end
+          sections.last << bin
+        end
+        sections.each do |section|
+          max = section.map(&:data).max
+          section.map {|bin| bin.data = bin.data / max * 100 }
+        end
+        sections.flatten
+      end
     end
   end
 end

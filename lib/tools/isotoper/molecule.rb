@@ -29,7 +29,7 @@ class Molecule
       arrs[element] = arr
     end
     require_relative 'isotopes'
-    require_relative '../tools/fft_R'
+    require_relative '../fft_R'
     transformer = FFT.new
     arrs.keys.each do |element|
       isotopes = ::Isotopes[element]

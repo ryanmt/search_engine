@@ -5,8 +5,8 @@ class XCorr
     range = ((num * -1)..(-1)).to_a + (1..num).to_a
     correction_arrays = range.map do |i|
       bin_shifter(experimental_scan, i)
-    end
-    y_prime = experimental_scan.zip(correction_arrays.transpose.inject(:+) ).map {|a| a.first - a.last }
+    end #.transpose.inject(:+).map {|a| a/150}
+    y_prime = experimental_scan.zip(correction_arrays.transpose.inject(:+) ).map {|a| a.first - a.last/150 }
     theoretical_scans.map {|scan| dot_product(scan, y_prime) }
   end
 

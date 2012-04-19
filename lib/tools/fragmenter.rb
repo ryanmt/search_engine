@@ -1,7 +1,8 @@
 require_relative 'fragmenter/masses'
+require_relative 'charge_calculator'
 module MS
   class Fragmenter
-    include Ms
+    include MS
 
     attr_accessor :list
     TableEntry = Struct.new(:ion, :seq, :mass, :charge, :composition_arr)
@@ -37,7 +38,7 @@ module MS
           end
         end
       end
-      @mass_list = opts[:avg] ? Ms::AvgResidueMasses : Ms::MonoResidueMasses
+      @mass_list = opts[:avg] ? MS::AvgResidueMasses : MS::MonoResidueMasses
       #putsv "@mass_list: #{@mass_list}"
     end #set_options
       
@@ -59,18 +60,18 @@ module MS
     end
     def generate_fragment_masses(sequence) # Returns the TableEntry object which should be easy to use for table generation
       @sequence = sequence
-      @max_charge ||= charge_at_pH(identify_potential_charges(sequence), 2).ceil
+      @max_charge ||= MS::ChargeCalculator.charge_at_pH(MS::ChargeCalculator.identify_potential_charges(sequence), 2).ceil
       ### Calculate the base ion masses	
       n_terms, c_terms = calculate_fragments(sequence)
       n_terms.map! do |seq|
-        mass = Ms::NTerm
+        mass = MS::NTerm
         seq.chars.map(&:to_sym).each do |residue|
           mass += @mass_list[residue]
         end
         [seq, mass]
       end
       c_terms.map! do |seq|
-        mass = Ms::CTerm
+        mass = MS::CTerm
         seq.chars.map(&:to_sym).each do |residue|
           mass += @mass_list[residue]
         end
