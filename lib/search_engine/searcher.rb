@@ -1,4 +1,3 @@
-require 'json'
 require 'tools/digestor'
 require 'peptide_centric'
 require 'tools/fragmenter'
@@ -37,7 +36,7 @@ module MS
         fragger = MS::Fragmenter.new
         theoretical_spectra = pep_centric_hash.keys.map do |aaseq|
           mzs = fragger.fragment(aaseq)
-          MS::DataStructs::TheoreticalSpectrum.new(mzs, Array.new(mzs.size, 100.0), aaseq)
+          MS::DataStructs::TheoreticalSpectrum.new(mzs, Array.new(mzs.size, 100.0), MS::DataStructs::Peptide.new(aaseq))
         end
         if MS::SearchEngine::Options[:write_spectradb] 
           # Write out the theoretical spectra...
@@ -59,6 +58,7 @@ module MS
         tmp
       end
       def search_mzml(mzml_file)
+        filter_theoretical_spectra_by_precursor_mass
         experimental_spectra = []
         Mspire::Mzml.open(mzml_file) do |mzml|
           mzml.each do |spec|
@@ -68,14 +68,21 @@ module MS
         end
         #Each spectrum:
         experimental_spectra.each do |spectrum|
-          spectrum.bins = MS::Bin.create_bins_by_ppm(section_top, end_point , MS::SearchEngine::Options[:ms2_mass_tolerance])
+          spectrum.bins = MS::Bin.create_bins_by_ppm(spectrum.mzs.min,spectrum.mzs.max  , MS::SearchEngine::Options[:ms2_mass_tolerance])
           MS::Bin.bin(spectrum.bins, spectrum.mzs_and_intensities, &:first)
           spectrum.bins.each do |bin|
             bin.data= bin.data.map(&:last).inject(:+)
           end
           spectrum.bins = normalize_by_section(spectrum.bins)
+          range = PPM.mass_to_window(spectrum.precursor_neutral_mass, MS::SearchEngine::Options[:precursor_mass_tolerance])
+          search_space = @theoretical_spectra.select {|a| range.include? a.precursor_mass}
+          
+          
+# NOW I need to bin the search_space arrays to the same bins and then process them
+          #search_space.map{|a| a.bins.map(&:data)}
+          p XCorr.compare_to(search_space, spectrum.bins.map(&:data))
         end
-        # Compare to fragmentation scans within selected mass window (ONLY CALL THIS ONCE, as the experimental scan will be preprocessed then compared to each theoretical scan)
+       # TODO Finish out the search 
       end
       def normalize_by_section(bins)
         end_point = bins.map(&:end).max
@@ -96,6 +103,9 @@ module MS
           section.map {|bin| bin.data = bin.data / max * 100 }
         end
         sections.flatten
+      end
+      def filter_theoretical_spectra_by_precursor_mass
+        @theoretical_spectra.sort_by! {|spectrum| spectrum.precursor_neutral_mass }
       end
     end
   end

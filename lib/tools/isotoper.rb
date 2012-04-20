@@ -15,7 +15,7 @@ module MS
     def generate_spectra(sequence)
       @sequence = sequence
       #TODO Generate a ms1 
-      ms1_entries = normalize(precursor_masses(sequence))
+      ms1_entries = normalize(isotopic_distribution(sequence))
       #TODO Generate a ms2
       #ms2_entries = Fragmenter.new(fragmenter_opts).fragment(sequence, fragment_opts)
       #spectrum_to_mgf(ms1_entries)
@@ -91,9 +91,22 @@ module MS
       end
       fft_resp
     end
+    def self.precursor_mass(sequence)
+      @atom_counts = Mspire::Isotope::AA::ATOM_COUNTS
+      resp = sequence.each_char.map {|aa| @atom_counts[aa] }
+      pep_counts = Hash.new {|h,k| h[k] = 0 }
+      resp.map do |h| 
+        h.keys.each {|k| pep_counts[k] += h[k] }
+      end
+      pep_counts[:h] +=2
+      pep_counts[:o] +=1
+      require_relative 'isotoper/molecule'
+      @m = Molecule.new(pep_counts, charge_state: 0, name: sequence)
+      @m.mass(@m.counts_to_formula)
+    end
 # This function would generate the ms1 spectra masses for a given peptide sequence.
-    def precursor_masses(sequence)
-      @atom_counts = ::MS::Isotope::AA::ATOM_COUNTS
+    def isotopic_distribution(sequence)
+      @atom_counts = Mspire::Isotope::AA::ATOM_COUNTS
       resp = sequence.each_char.map do |aa|
         @atom_counts[aa]
       end
