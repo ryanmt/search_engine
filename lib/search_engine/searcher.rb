@@ -45,9 +45,10 @@ module MS
       end
 
       def output(spectra)
-        puts %w{ID qvalue Xcorr ppm Peptide Proteins}.join("\t") 
+        puts %w{ID qvalue Xcorr ppm Peptide Proteins}.join("\t\t") 
+        puts "spectra.first.match.theoretical_spectrum.peptide: #{spectra.first.match.theoretical_spectrum.peptide}"
         spectra.each_with_index do |spectrum, i|
-          puts ["scan=#{i+1}",spectrum.match.qvalue, spectrum.match.xcorr, spectrum.match.ppm, spectrum.match.theoretical_spectrum.peptide, @pep_centric_hash[spectrum.match.theoretical_spectrum.peptide]].join("\t")
+          puts ["scan=#{i+1}",spectrum.match.qvalue, spectrum.match.xcorr, spectrum.match.ppm, spectrum.match.theoretical_spectrum.peptide, @pep_centric_hash[spectrum.match.theoretical_spectrum.peptide]].join("\t\t")
         end
       end
       def create_decoy_file(file)
@@ -64,7 +65,7 @@ module MS
           pepcent_out = outfile_name.sub('changethis', ".pepcentric_#{Time.now.to_i}.yml") 
           putsv "Writing #{pepcent_out}"
           File.open(pepcent_out, 'w') do |out| 
-            out.print @pep_centric_hash.to_json
+            out.print @pep_centric_hash.to_yaml
           end
         end # Options
         # Generate theoretical spectra
@@ -127,7 +128,7 @@ module MS
           xcorrs = XCorr.compare_to(search_space.map{|a| a.bins.map(&:data)}, spectrum.bins.map(&:data))
           
           best_xcorr_and_index = xcorrs.each_with_index.max
-          spectrum.match = MS::DataStructs::Match.new(best_xcorr_and_index.first, search_space[best_xcorr_and_index.last], search_space[best_xcorr_and_index.last].precursor_mass) unless search_space.empty?
+          spectrum.match = MS::DataStructs::Match.new(best_xcorr_and_index.first, search_space[best_xcorr_and_index.last], PPM.calculate(search_space[best_xcorr_and_index.last].precursor_mass, spectrum.precursor_neutral_mass)) unless search_space.empty?
           matched_spectra << spectrum
         end
         matched_spectra

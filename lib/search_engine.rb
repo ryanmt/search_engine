@@ -17,7 +17,7 @@ module MS
     # Default Options Hash: Tolerances in ppm for now
     Options = {decoy: true, 
       precursor_mass_tolerance: 100, 
-      ms2_mass_tolerance: 2000, 
+      ms2_mass_tolerance: 1000, 
       write_pepdb: false,
       write_spectradb: false,
       xcorr_range: 75,
