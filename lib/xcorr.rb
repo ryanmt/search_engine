@@ -7,7 +7,9 @@ class XCorr
       bin_shifter(experimental_scan, i)
     end #.transpose.inject(:+).map {|a| a/150}
     y_prime = experimental_scan.zip(correction_arrays.transpose.inject(:+) ).map {|a| a.first - a.last/150 }
-    theoretical_scans.map {|scan| dot_product(scan, y_prime) }
+    theoretical_scans.map do |scan| 
+      dot_product(scan, y_prime)
+    end
   end
 
   # Comparative benchmarking @ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/277157
@@ -22,11 +24,11 @@ class XCorr
   def self.bin_shifter(arr, bin_shift)
     rollover = arr.size
     arr.each_index.map do |i| 
-      #DEBUGGING
-        putsv "i+bin_shift >= rollover: #{i+bin_shift} >= #{rollover}"
-        putsv "rollover-(i+bin_shift): #{rollover - (i + bin_shift)}"
-        putsv "(i+bin_shift): #{(i + bin_shift)}"
-      #Output
+#      #DEBUGGING
+#        putsv "i+bin_shift >= rollover: #{i+bin_shift} >= #{rollover}"
+#        putsv "rollover-(i+bin_shift): #{rollover - (i + bin_shift)}"
+#        putsv "(i+bin_shift): #{(i + bin_shift)}"
+#      #Output
       i+bin_shift >= rollover ? arr[(rollover-(i+bin_shift)).abs] : arr[i+bin_shift]
     end
   end

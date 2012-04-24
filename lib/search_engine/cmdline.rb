@@ -21,7 +21,7 @@ module MS
           return
         end
         searcher = MS::SearchEngine::Searcher.new(args[0])
-        searcher.search_mzml(args[1])
+        searcher.search(args[1])
       end #self.run
     end
   end

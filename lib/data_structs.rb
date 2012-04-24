@@ -9,7 +9,10 @@ require 'tools/fragmenter/masses'
     end
 
     class Match
-      attr_accessor :xcorr, :ppm, :experimental_spectrum, :theoretical_spectrum
+      attr_accessor :xcorr, :ppm, :experimental_spectrum, :theoretical_spectrum, :qvalue
+      def initialize(xcorr, spectrum, ppm)
+        @xcorr, @theoretical_spectrum, @ppm = xcorr, spectrum, ppm
+      end
     end
 
     class SpectrumObjects
@@ -27,11 +30,12 @@ require 'tools/fragmenter/masses'
       end
     end
     class TheoreticalSpectrum < SpectrumObjects
-      attr_accessor :peptide
+      attr_accessor :peptide, :bins
       def initialize(mzs, intensities = Array.new(mzs.size, 100.0), peptide)
         @mzs, @intensities, @peptide = mzs, intensities, peptide
         @precursor_z = 0
         @precursor_mass = @peptide.precursor_neutral_mass
+        @bins = []
       end
     end #TheoreticalSpectrum
     class ExperimentalSpectrum < SpectrumObjects

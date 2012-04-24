@@ -1,4 +1,5 @@
-require 'fragmenter'
+
+require 'tools/fragmenter'
 require 'rserve/simpler'
 require 'mspire/isotope/aa'
 r = Rserve::Simpler.new

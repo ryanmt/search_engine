@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-require 'rubygems'
 require 'bundler'
 begin
   Bundler.setup(:default, :development)
@@ -17,11 +16,12 @@ Jeweler::Tasks.new do |gem|
   gem.name = "search_engine"
   gem.homepage = "http://github.com/ryanmt/search_engine"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Sequest in ruby}
+  gem.description = %Q{Sequest in ruby}
   gem.email = "ryanmt@byu.net"
   gem.authors = ["Ryan Taylor"]
   # dependencies defined in Gemfile
+  gem.files = Dir['lib/**/*.rb'] + Dir['bin/*']
 end
 Jeweler::RubygemsDotOrgTasks.new
 

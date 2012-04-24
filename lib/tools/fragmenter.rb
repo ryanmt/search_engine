@@ -66,7 +66,12 @@ module MS
       n_terms.map! do |seq|
         mass = MS::NTerm
         seq.chars.map(&:to_sym).each do |residue|
+          begin 
           mass += @mass_list[residue]
+          rescue TypeError
+            binding.pry
+            abort
+          end
         end
         [seq, mass]
       end

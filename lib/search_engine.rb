@@ -21,6 +21,7 @@ module MS
       write_spectradb: false,
       xcorr_range: 75,
       normalization_window_width: 100, 
+      write_tsv_file: true,
       missed_cleavages: 2 } 
   end
 end
