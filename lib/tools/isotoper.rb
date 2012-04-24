@@ -5,7 +5,6 @@ require 'mspire/isotope/aa'
 r = Rserve::Simpler.new
 module MS
   class Isotoper
-    include Ms
     Neutron = 1.00866491600
     TableEntry = Struct.new(:ion, :seq, :mass, :charge, :composition_arr)
     Defaults = { charge_state: 1, graph: false, normalize: :first_peak}

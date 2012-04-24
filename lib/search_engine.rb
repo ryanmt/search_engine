@@ -1,6 +1,7 @@
 require 'data_structs'
 require 'spectrum'
 require 'search_engine/searcher'
+require 'search_engine/cmdline'
 require 'tools/isotoper'
 require 'xcorr'
 

@@ -47,7 +47,7 @@ module MS
       def output(spectra)
         puts %w{ID qvalue Xcorr ppm Peptide Proteins}.join("\t") 
         spectra.each_with_index do |spectrum, i|
-          puts ["scan=#{i+1}",spectrum.match.qvalue, spectrum.match.xcorr, spectrum.match.ppm, spectrum.match.theoretical_spectru.peptide, @pep_centric_hash[spectrum.match.theoretical_spectrum.peptide]].join("\t")
+          puts ["scan=#{i+1}",spectrum.match.qvalue, spectrum.match.xcorr, spectrum.match.ppm, spectrum.match.theoretical_spectrum.peptide, @pep_centric_hash[spectrum.match.theoretical_spectrum.peptide]].join("\t")
         end
       end
       def create_decoy_file(file)
